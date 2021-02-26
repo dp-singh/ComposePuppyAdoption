@@ -17,45 +17,63 @@ package com.example.androiddevchallenge
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navArgument
+import androidx.navigation.compose.navigate
+import androidx.navigation.compose.rememberNavController
+import com.example.androiddevchallenge.ui.detail.DogDetailsViewEvent
+import com.example.androiddevchallenge.ui.detail.DogsDetailsScreen
+import com.example.androiddevchallenge.ui.detail.DogsDetailsScreenViewModel
+import com.example.androiddevchallenge.ui.list.DogsListScreen
+import com.example.androiddevchallenge.ui.list.DogsListScreenViewModel
 import com.example.androiddevchallenge.ui.theme.MyTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+    private val viewModelList: DogsListScreenViewModel by viewModels()
+    private val viewModelDetail: DogsDetailsScreenViewModel by viewModels()
+
+    @ExperimentalFoundationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyTheme {
-                MyApp()
+                val navController: NavHostController = rememberNavController()
+                NavHost(navController, startDestination = URI_DOG_LIST) {
+                    composable(URI_DOG_LIST) {
+                        DogsListScreen(
+                            navController,
+                            viewModelList
+                        )
+                    }
+                    composable(
+                        URI_DOG_DETAILS,
+                        arguments = listOf(
+                            navArgument(PARAM_DOG_NAME) { type = NavType.StringType },
+                        )
+                    ) { backStackEntry ->
+                        val dogName = backStackEntry.arguments?.getString(PARAM_DOG_NAME).orEmpty()
+                        viewModelDetail.onViewEvent(DogDetailsViewEvent.Init(dogName))
+                        DogsDetailsScreen(dogName = dogName, viewModelDetail) {
+                            navController.popBackStack()
+                        }
+                    }
+                }
             }
         }
     }
 }
 
-// Start building your app here!
-@Composable
-fun MyApp() {
-    Surface(color = MaterialTheme.colors.background) {
-        Text(text = "Ready... Set... GO!")
-    }
-}
-
-@Preview("Light Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun LightPreview() {
-    MyTheme {
-        MyApp()
-    }
-}
-
-@Preview("Dark Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun DarkPreview() {
-    MyTheme(darkTheme = true) {
-        MyApp()
-    }
+const val PARAM_DOG_NAME = "dogName"
+const val URI_DOG_LIST = "dog_list"
+const val URI_DOG_DETAILS = "dog_detail/{$PARAM_DOG_NAME}"
+fun NavHostController.navigateToDogDetails(dogName: String) {
+    this.navigate(URI_DOG_DETAILS.replace("{$PARAM_DOG_NAME}", dogName))
 }

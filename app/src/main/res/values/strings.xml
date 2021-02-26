@@ -10,4 +10,13 @@
       the License.
       -->
     <string name="app_name">AndroidDevChallenge</string>
+    <string name="back">back</string>
+    <string name="app_title">Home</string>
+    <string name="error_title">Oops!</string>
+    <string name="error_subtitle">Something went wrong, Please try again.</string>
+    <string name="error_try_again">Try again.</string>
+    <string name="loading_text">Loading..</string>
+    <string name="wait_text">%s kgs</string>
+    <string name="height_text">%s cm at the withers</string>
+    <string name="life_span_text">%s average life span"</string>
 </resources>
